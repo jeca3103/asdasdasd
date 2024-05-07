@@ -1,0 +1,33 @@
+(function () {
+    const hostname = window.location.host.replace(/www.|store./gi, "");
+    const hasGtmConsent = window.$nuxt.$store?.state?.hasGtmConsent;
+    const gtmConfiguration = window.$nuxt.$store?.state?.gtmConfiguration;
+    const defaultGtmScriptUrl = window.$nuxt.$config?.gtm?.sourceScriptUrl;
+    const gtmContainer =
+        gtmConfiguration?.containerId || window.$nuxt.$config?.gtm?.id;
+
+    let gtmScriptUrl;
+
+    if (gtmConfiguration?.consentNeeded) {
+        if (hasGtmConsent) {
+            gtmScriptUrl = gtmConfiguration?.scriptUrl || defaultGtmScriptUrl;
+        }
+    } else if (gtmConfiguration?.scriptUrl) {
+        gtmScriptUrl = gtmConfiguration?.scriptUrl;
+    } else if (hasGtmConsent) {
+        gtmScriptUrl = defaultGtmScriptUrl;
+    }
+
+    if (!hostname || !gtmScriptUrl || !gtmContainer) return;
+
+    (function (w, d, s, l, i) {
+        w[l] = w[l] || [];
+        w[l].push({ "gtm.start": new Date().getTime(), event: "gtm.js" });
+        const f = d.getElementsByTagName(s)[0];
+        const j = d.createElement(s);
+        const dl = l !== "dataLayer" ? "&l=" + l : "";
+        j.async = true;
+        j.src = gtmScriptUrl + "?id=" + i + dl;
+        f.parentNode.insertBefore(j, f);
+    })(window, document, "script", "dataLayer", gtmContainer);
+})();
